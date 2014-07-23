@@ -1,0 +1,57 @@
+Rilncraft is a plugin for CraftBukkit that adds an economy,
+social enhancements, region claiming, teleports/warps and
+teams.
+
+HOW TO USE - FROM THE HELP FILES
+
+/rchelp
+[Rilncraft Help]
+-- /rchelp general
+-- /rchelp teleport
+-- /rchelp friends
+-- /rchelp claims
+-- /rchelp marriage
+-- /rchelp teams
+
+/rchelp general
+[Rilncraft Help]
+Kill mobs to earn more Riln; you lose some Riln when you die.
+-- To check balance: /riln
+-- To give someone Riln: /riln pay [player] [amount]
+
+/rchelp teleport
+[Rilncraft Help]
+-- To send tp request: /tpr [player]
+Teleports cost 35 Riln, 20 to teammates, 10 to friends
+
+/rchelp friends
+[Rilncraft Help]
+Adding a friend reduces TP cost and disables PVP.
+-- To list friends: /friends
+-- To add a friend: /friends add [player]
+-- To remove a friend: /friends remove [player]
+
+/rchelp claims
+[Rilncraft Help]
+Claim land to protect it from grief, at the cost of Riln.
+-- To make a claim tool: /claim tool
+Mark opposing corners with the claim tool.
+-- To purchase marked region: /claim
+-- To share claim: /claim share friends
+
+/rchelp marriage
+[Rilncraft Help]
+Married players share Riln and gain other benefits
+-- To propose to someone: /marry [player]
+-- To divorce: /divorce
+Benefits:
+-- Right click spouse to open their inventory
+-- Shift+Right click to heal/kiss them
+-- Instant, free TP with /tpr
+-- Share pets by right-clicking them
+
+/rchelp teams
+[Rilncraft Help]
+Joining teams reduces TP cost and disables PVP.
+-- To create a team: /team create
+-- To invite players: /team invite [player]
