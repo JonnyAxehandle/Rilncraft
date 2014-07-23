@@ -1,0 +1,49 @@
+# Starting balance
+starting_balance: 100
+
+# Cost to connect
+cost_friend: 500
+cost_marry: 5000
+
+# Teleports
+tp_cost: 30
+tp_cost_friend: 10
+tp_cost_team: 15
+
+# Mob Rewards
+mob_reward:
+    Pig: 3
+    Sheep: 3
+    Cow: 4
+    Chicken: 2
+    Squid: 3
+    Zombie:
+        min: 5
+        max: 7
+    Slime: 5
+    Skeleton:
+        min: 7
+        max: 10
+    Spider:
+        min: 7
+        max: 10
+    Creeper:
+        min: 10
+        max: 12
+    Enderman:
+        min: 10
+        max: 15
+    Witch:
+        min: 25
+        max: 35
+    Giant: 150
+    PigZombie:
+        min: 15
+        max: 20
+    Ghast: 50
+    LavaSlime: 7
+    Blaze:
+        min: 30
+        max: 35
+    EnderDragon: 10000
+    WitherBoss: 1000

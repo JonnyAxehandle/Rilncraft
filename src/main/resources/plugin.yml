@@ -1,0 +1,32 @@
+name: Rilncraft
+main: io.github.jonnyaxehandle.rilncraft.Rilncraft
+version: 0.0.1
+commands:
+    balance:
+        usage: /balance
+    pay:
+        usage: /pay [player name] [amount]
+    tpr:
+        usage: /tpr [player name]
+    marry:
+        usage: /marry [player name] - Send a marriage proposal
+    friends:
+        usage: /friends add|remove [playername] - Add/remove a player as a friend
+    accept:
+        usage: /accept
+    deny:
+        usage: /deny
+    claim:
+        usage: /claim
+    unclaim:
+        usage: /unclaim
+    rankup:
+        usage: /rankup
+    warp:
+        usage: /warp
+    team:
+        usage: /team (create|dispand|invite|kick|promote) (Team|Player)
+    divorce:
+        usage: /divorce
+    rchelp:
+        usage: /rchelp [page]
