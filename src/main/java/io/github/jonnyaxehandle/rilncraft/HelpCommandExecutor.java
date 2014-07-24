@@ -42,11 +42,13 @@ class HelpCommandExecutor implements CommandExecutor {
 "-- To remove a friend: /friends remove [player]");
                     return true;
                 case "claims":
-                    cs.sendMessage("Claim land to protect it from grief, at the cost of Riln.\n" +
-"-- To make a claim tool: /claim tool\n" +
-"Mark opposing corners with the claim tool.\n" +
-"-- To purchase marked region: /claim\n" +
-"-- To share claim: /claim share friends");
+                    cs.sendMessage(
+                        "Claim land to protect it from grief, at the cost of Riln.\n" +
+                        "-- To set/unset your claim tool: /claim tool\n" +
+                        "Mark opposing corners of a region with the claim tool.\n" +
+                        "-- To purchase marked region: /claim\n" +
+                        "-- To share claim: /claim share friends\n" +
+                        "-- To uclaim: /unclaim");
                     return true;
                 case "marriage":
                     cs.sendMessage("Married players share Riln and gain other benefits\n" +

@@ -144,5 +144,34 @@ public class Team {
         members.add(mem);
         save();
     }
+
+    ArrayList<UUID> getMembers() {
+        return members;
+    }
+    
+    public boolean isOfficer( UUID id )
+    {
+        if( owner.equals(id) )
+        {
+            return true;
+        }
+        
+        return officers.contains(id);
+    }
+
+    void removePlayer(UUID id) {
+        if( members.contains(id) )
+        {
+            members.remove(id);
+        }
+        if( officers.contains(id) )
+        {
+            officers.remove(id);
+        }
+    }
+
+    void delete() {
+        customConfigFile.delete();
+    }
     
 }

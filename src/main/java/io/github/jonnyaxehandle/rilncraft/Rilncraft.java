@@ -16,10 +16,10 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import de.slikey.effectlib.EffectLib;
-import de.slikey.effectlib.EffectManager;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+
+/*import de.slikey.effectlib.EffectLib;
+import de.slikey.effectlib.EffectManager;*/
 
 /**
  *
@@ -29,7 +29,7 @@ public final class Rilncraft extends JavaPlugin implements Listener {
     
     FileConfiguration config;
     ClaimedRegionList claimedRegions;
-    EffectManager effectManager;
+    //EffectManager effectManager;
     
     PlayerList playerList;
     TeamList teamList;
@@ -87,8 +87,8 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         }
         
         // Command executors
-        getCommand("pay").setExecutor(new PayCommandExecutor(this));
-        getCommand("balance").setExecutor(new BalanceCommandExecutor(this));
+        getCommand("rchelp").setExecutor(new HelpCommandExecutor(this));
+        getCommand("riln").setExecutor(new RilnCommandExecutor(this));
         
         getCommand("tpr").setExecutor(new TPRCommandExecutor(this));
         getCommand("friends").setExecutor(new FriendsCommandExecutor(this));
@@ -106,8 +106,6 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         
         getCommand("team").setExecutor(new TeamCommandExecutor(this));
         
-        getCommand("rchelp").setExecutor(new HelpCommandExecutor(this));
-        
         // Events
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new PlayerEvents(this), this);
@@ -116,8 +114,8 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new MarryEventHandler(this), this);
         
         // Particles
-        EffectLib lib = EffectLib.instance();
-        effectManager = new EffectManager(lib);
+        //EffectLib lib = EffectLib.instance();
+        //effectManager = new EffectManager(lib);
         
         // Claims
         claimedRegions = new ClaimedRegionList( this );

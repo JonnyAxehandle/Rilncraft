@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -227,6 +228,23 @@ public class RCPlayer {
     public void setRequest( Request r )
     {
         request = r;
+        BukkitRunnable timeout = new BukkitRunnable() {
+            private RCPlayer player;
+            @Override
+            public void run() {
+                if( player.getRequest() != null )
+                {
+                    player.getRequest().timeout();
+                }
+            }
+            
+            BukkitRunnable setPlayer( RCPlayer p )
+            {
+                player = p;
+                return this;
+            }
+        }.setPlayer( this );
+        timeout.runTaskLater(this.plugin, 600);
     }
     
     public Request getRequest()

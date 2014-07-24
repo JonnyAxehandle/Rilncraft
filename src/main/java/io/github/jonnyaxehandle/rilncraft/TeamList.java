@@ -60,5 +60,10 @@ public class TeamList {
     {
         return teams;
     }
+
+    void remove(Team t) {
+        t.delete();
+        teams.remove(t.getName());
+    }
     
 }

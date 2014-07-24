@@ -49,8 +49,7 @@ class TeamCommandExecutor implements CommandExecutor {
             case "listall":
                 return listAllTeams( player );
             case "disband":
-                player.sendMessage( Prefixes.team + "Not yet supported" );
-                break;    
+                return disband( player );
         }
         
         try
@@ -68,9 +67,9 @@ class TeamCommandExecutor implements CommandExecutor {
             case "invite":
                 return invitePlayer( player , inputName );
             case "kick":
+                return kickPlayer( player , inputName );
             case "promote":
-                player.sendMessage( Prefixes.team + "Not yet supported" );
-                break;
+                return promotePlayer( player , inputName );
         }
         
         return false;
@@ -114,7 +113,7 @@ class TeamCommandExecutor implements CommandExecutor {
             return true;
         }
         
-        if( playerData.currentTeam.getOwner() != player.getUniqueId() && !playerData.currentTeam.getOfficers().contains(player.getUniqueId()) )
+        if( !playerData.currentTeam.isOfficer( player.getUniqueId() ) )
         {
             player.sendMessage( Prefixes.team + "Only owners/officers can invite" );
             return true;
@@ -161,6 +160,18 @@ class TeamCommandExecutor implements CommandExecutor {
         player.sendMessage( Prefixes.team + t.getName() );
         player.sendMessage( String.format("-- Owner: %s",idToName( t.getOwner() )) );
         
+        player.sendMessage("-- Officers:");
+        for( UUID id : t.getOfficers() )
+        {
+            player.sendMessage( idToName( id ) );
+        }
+        
+        player.sendMessage("-- Members:");
+        for( UUID id : t.getMembers() )
+        {
+            player.sendMessage( idToName( id ) );
+        }
+        
         return true;
     }
     
@@ -174,9 +185,136 @@ class TeamCommandExecutor implements CommandExecutor {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
         if( offlinePlayer != null )
         {
-            return offlinePlayer.getPlayer().getDisplayName();
+            return offlinePlayer.getName();
         }
         return "NULL";
+    }
+
+    private UUID nameToID( Team t , String name )
+    {
+        for( UUID id : t.getPlayers() )
+        {
+            if( "NULL".equals(idToName( id )) )
+            {
+                continue;
+            }
+            
+            if( name.equals(idToName( id )) )
+            {
+                return id;
+            }
+        }
+        return null;
+    }
+    
+    private boolean promotePlayer(Player player, String inputName) {
+        RCPlayer playerData = plugin.playerList.get(player);
+        Team t = playerData.currentTeam;
+        
+        if( t == null )
+        {
+            player.sendMessage( Prefixes.team + "You are not on any team" );
+            return true;
+        }
+        
+        if( !playerData.uuid.equals(t.getOwner()) )
+        {
+            player.sendMessage( Prefixes.team + "Only team owner can promote" );
+            return true;
+        }
+        
+        UUID id = nameToID( t , inputName );
+        if( id == null )
+        {
+            player.sendMessage( Prefixes.team + "That player is not on your team" );
+            return true;
+        }
+        
+        if( t.isOfficer(id) )
+        {
+            player.sendMessage( Prefixes.team + "That player is already promoted" );
+            return true;
+        }
+        
+        t.addOfficer(id);
+        player.sendMessage( Prefixes.team + String.format("%s was promoted",inputName) );
+        
+        return true;
+    }
+
+    private boolean kickPlayer(Player player, String inputName) {
+        RCPlayer playerData = plugin.playerList.get(player);
+        Team t = playerData.currentTeam;
+        
+        if( t == null )
+        {
+            player.sendMessage( Prefixes.team + "You are not on any team" );
+            return true;
+        }
+        
+        if( !t.isOfficer(player.getUniqueId()) )
+        {
+            player.sendMessage( Prefixes.team + "Only team officers can kick" );
+            return true;
+        }
+        
+        UUID id = nameToID( t , inputName );
+        if( id == null )
+        {
+            player.sendMessage( Prefixes.team + "That player is not on your team" );
+            return true;
+        }
+        
+        if( id.equals(t.getOwner()) )
+        {
+            player.sendMessage( Prefixes.team + "Owner cannot be kicked" );
+            return true;
+        }
+        
+        if( t.isOfficer(id) )
+        {
+            if( !playerData.uuid.equals(t.getOwner()) )
+            {
+                player.sendMessage( Prefixes.team + "Only team owners can remove officers!" );
+                return true;
+            }
+        }
+        
+        player.sendMessage( Prefixes.team + String.format("%s was kicked",inputName) );
+        t.removePlayer(id);
+        RCPlayer get = plugin.playerList.get( id );
+        get.currentTeam = null;
+        
+        return true;
+    }
+
+    private boolean disband(Player player) {
+        RCPlayer playerData = plugin.playerList.get(player);
+        Team t = playerData.currentTeam;
+        
+        if( t == null )
+        {
+            player.sendMessage( Prefixes.team + "You are not on any team" );
+            return true;
+        }
+        
+        if( !playerData.uuid.equals(t.getOwner()) )
+        {
+            player.sendMessage( Prefixes.team + "Only team owner can disband" );
+            return true;
+        }
+        
+        for( UUID id : t.getPlayers() )
+        {
+            t.removePlayer(id);
+            RCPlayer get = plugin.playerList.get( id );
+            get.currentTeam = null;
+        }
+        
+        plugin.getServer().broadcastMessage( Prefixes.team + String.format("%s disbanded %s", player.getDisplayName() , t.getName()) );
+        plugin.teamList.remove( t );
+        
+        return true;
     }
     
 }

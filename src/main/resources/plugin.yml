@@ -1,11 +1,7 @@
 name: Rilncraft
 main: io.github.jonnyaxehandle.rilncraft.Rilncraft
-version: 0.0.1
+version: 0.1
 commands:
-    balance:
-        usage: /balance
-    pay:
-        usage: /pay [player name] [amount]
     tpr:
         usage: /tpr [player name]
     marry:
@@ -30,3 +26,5 @@ commands:
         usage: /divorce
     rchelp:
         usage: /rchelp [page]
+    riln:
+        usage: /riln [pay (player name) (amount)]
