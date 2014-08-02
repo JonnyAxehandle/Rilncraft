@@ -6,6 +6,8 @@
 
 package io.github.jonnyaxehandle.rilncraft;
 
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.ChatChannel;
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.MarriageChatChannel;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -50,6 +52,8 @@ class TeamCommandExecutor implements CommandExecutor {
                 return listAllTeams( player );
             case "disband":
                 return disband( player );
+            case "chat":
+                return joinChat( player );
         }
         
         try
@@ -313,6 +317,52 @@ class TeamCommandExecutor implements CommandExecutor {
         
         plugin.getServer().broadcastMessage( Prefixes.team + String.format("%s disbanded %s", player.getDisplayName() , t.getName()) );
         plugin.teamList.remove( t );
+        
+        return true;
+    }
+
+    private boolean joinChat(Player player) {
+        RCPlayer playerData = plugin.playerList.get(player);
+        Team t = playerData.currentTeam;
+        
+        if( t == null )
+        {
+            player.sendMessage( Prefixes.team + "You are not on any team" );
+            return true;
+        }
+        ChatChannel chatChannel = t.getChatChannel();
+        
+        if( playerData.getChatChannel() != null )
+        {
+            // Leave your current channel
+            ChatChannel currentChatChannel = playerData.getChatChannel();
+            currentChatChannel.removePlayer(player);
+            playerData.setChatChannel( null );
+            if( currentChatChannel == chatChannel )
+            {
+                // Intent was to leave team chat
+                return true;
+            }
+        }
+        
+        playerData.setChatChannel(chatChannel);
+        chatChannel.addPlayer(player);
+        
+        for( UUID id : t.getPlayers() )
+        {
+            Player recip = plugin.getServer().getPlayer(id);
+            if( recip == null )
+            {
+                continue;
+            }
+            
+            RCPlayer recipData = plugin.playerList.get(recip);
+            if( recipData.getChatChannel() == null )
+            {
+                recip.sendMessage( Prefixes.team + player.getDisplayName() + " joined team chat." );
+                recip.sendMessage( "-- To join type: /team chat");
+            }
+        }
         
         return true;
     }

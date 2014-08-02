@@ -1,0 +1,6 @@
+# WARNING: Editing this file will retroactivly affect players
+ranks:
+  - name: Freshie
+    cost: 0
+  - name: Survivor
+    cost: 1000

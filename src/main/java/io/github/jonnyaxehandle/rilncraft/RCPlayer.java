@@ -1,20 +1,28 @@
 package io.github.jonnyaxehandle.rilncraft;
 
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.ChatChannel;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 
 /**
  *
@@ -27,7 +35,7 @@ public class RCPlayer {
     Rilncraft plugin;
     ClaimedRegion workingClaim;
     ClaimedRegion currentRegion;
-    PlayerRank rank;
+    private int rank;
     private File customConfigFile;
     private YamlConfiguration customConfig;
     private Request request;
@@ -35,6 +43,9 @@ public class RCPlayer {
     UUID uuid;
     Date lastKiss;
     Team currentTeam;
+    private Location marriageBed;
+    private ChatChannel chatChannel;
+    Scoreboard myBoard;
     
     @Override
     public boolean equals( Object o )
@@ -62,7 +73,6 @@ public class RCPlayer {
     public RCPlayer( Rilncraft rc )
     {
         plugin = rc;
-        rank = new PlayerRank( rc );
     }
     
     /**
@@ -97,7 +107,7 @@ public class RCPlayer {
         // Get Rank
         if( customConfig.isInt("rank") )
         {
-            rank.setRank( customConfig.getInt("rank") );
+            rank = customConfig.getInt("rank");
         }
 
         // Get Friends
@@ -120,6 +130,16 @@ public class RCPlayer {
             if( !"null".equals(customConfig.getString("spouse")) )
             {
                 spouse = UUID.fromString( customConfig.getString("spouse") );
+                if( customConfig.isConfigurationSection("marrybed") )
+                {
+                    ConfigurationSection marrybedConfig = customConfig.getConfigurationSection("marrybed");
+                    marriageBed = new Location(
+                            plugin.getServer().getWorld( marrybedConfig.getString("world") ),
+                            marrybedConfig.getInt("x"),
+                            marrybedConfig.getInt("y"),
+                            marrybedConfig.getInt("z")
+                    );
+                }
             }
         }
         
@@ -184,7 +204,7 @@ public class RCPlayer {
                 customConfig.set("name", getPlayer().getName());
             }
             customConfig.set("riln", riln);
-            customConfig.set("rank", rank.getRank());
+            customConfig.set("rank", rank);
             if( spouse == null )
             {
                 customConfig.set("spouse", "null");
@@ -209,6 +229,21 @@ public class RCPlayer {
             {
                 customConfig.set("team", " ");
             }
+            
+            if( marriageBed != null )
+            {
+                HashMap<String,Object> marrybedMap = new HashMap<>();
+                marrybedMap.put("world",marriageBed.getWorld().getName() );
+                marrybedMap.put("x",marriageBed.getBlockX());
+                marrybedMap.put("y",marriageBed.getBlockY());
+                marrybedMap.put("z",marriageBed.getBlockZ());
+                customConfig.set("marrybed", marrybedMap);
+            }
+            else
+            {
+                customConfig.set("marrybed", " ");
+            }
+            
             
             customConfig.save(customConfigFile);
         } catch (IOException ex) {
@@ -284,13 +319,14 @@ public class RCPlayer {
         player = Bukkit.getPlayer( uuid );
         if( player != null )
         {
-            int nextRankCost = rank.nextRankCost();
+            /*int nextRankCost = rank.nextRankCost();
             if( riln < nextRankCost && ( riln + amount ) >= nextRankCost )
             {
                 player.sendMessage( String.format("Type /rankup to purchase Rank %d for %d Riln!",rank.getRank()+1,nextRankCost) );
-            }
+            }*/
         }
         riln += amount;
+        syncMap();
     }
     
     public Player getPlayer()
@@ -389,6 +425,58 @@ public class RCPlayer {
 
     void setBalance(int newBalance) {
         riln = newBalance;
+    }
+
+    /*Object[] getRank() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }*/
+
+    Location getMarriageBed() {
+        return marriageBed;
+    }
+    
+    void setMarriageBed( Location l ) {
+        marriageBed = l;
+    }
+    
+    public ChatChannel getChatChannel()
+    {
+        return chatChannel;
+    }
+    
+    void setChatChannel( ChatChannel c )
+    {
+        chatChannel = c;
+    }
+    
+    public void syncMap()
+    {
+        syncMap( true );
+    }
+    
+    public void syncMap( boolean recurse )
+    {
+        if( myBoard == null )
+        {
+            return;
+        }
+        Objective objective = myBoard.getObjective(DisplaySlot.SIDEBAR);
+        Score score = objective.getScore( Bukkit.getOfflinePlayer("§eRiln") );
+        score.setScore( getRiln() );
+        
+        if( !recurse )
+        {
+            return;
+        }
+        
+        if( spouse != null )
+        {
+            RCPlayer spouseData = plugin.getPlayerList().get(spouse);
+            if( spouseData != null )
+            {
+                spouseData.syncMap( false );
+            }
+        }
     }
     
 }

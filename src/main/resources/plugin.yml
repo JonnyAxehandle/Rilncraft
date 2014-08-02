@@ -5,9 +5,9 @@ commands:
     tpr:
         usage: /tpr [player name]
     marry:
-        usage: /marry [player name] - Send a marriage proposal
+        usage: /marry propose|home [player name]
     friends:
-        usage: /friends add|remove [playername] - Add/remove a player as a friend
+        usage: /friends add|remove [playername]
     accept:
         usage: /accept
     deny:
@@ -18,8 +18,6 @@ commands:
         usage: /unclaim
     rankup:
         usage: /rankup
-    warp:
-        usage: /warp
     team:
         usage: /team (create|dispand|invite|kick|promote) (Team|Player)
     divorce:

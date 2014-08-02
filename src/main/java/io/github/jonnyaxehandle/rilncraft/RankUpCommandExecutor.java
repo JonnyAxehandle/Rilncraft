@@ -23,7 +23,7 @@ class RankUpCommandExecutor implements CommandExecutor {
             return true;
         }
         
-        RCPlayer playerData = plugin.playerList.get((Player) sender);
+        /*RCPlayer playerData = plugin.playerList.get((Player) sender);
         int nextRankCost = playerData.rank.nextRankCost();
         if( !playerData.chargeRiln(nextRankCost) )
         {
@@ -33,7 +33,7 @@ class RankUpCommandExecutor implements CommandExecutor {
         
         playerData.rank.rankUp();
         plugin.getServer().broadcastMessage( String.format("%s is now Rank %d!", sender.getName(), playerData.rank.getRank() ) );
-        sender.sendMessage( String.format("-- Cost to Rank Up: %d",playerData.rank.nextRankCost()) );
+        sender.sendMessage( String.format("-- Cost to Rank Up: %d",playerData.rank.nextRankCost()) );*/
         
         return true;
     }

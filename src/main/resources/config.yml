@@ -46,4 +46,4 @@ mob_reward:
         min: 30
         max: 35
     EnderDragon: 10000
-    WitherBoss: 1000
+    Wither: 1000

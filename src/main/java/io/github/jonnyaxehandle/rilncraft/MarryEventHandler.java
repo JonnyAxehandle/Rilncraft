@@ -1,7 +1,13 @@
 package io.github.jonnyaxehandle.rilncraft;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
@@ -10,6 +16,8 @@ import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -19,10 +27,12 @@ import org.bukkit.inventory.PlayerInventory;
  */
 public class MarryEventHandler implements Listener {
     private final Rilncraft plugin;
+    private final HashMap<Player,Location> bedCache;
     
     public MarryEventHandler( Rilncraft rc )
     {
         plugin = rc;
+        bedCache = new HashMap<>();
     }
     
     @EventHandler
@@ -42,7 +52,14 @@ public class MarryEventHandler implements Listener {
                 return;
             }
             
-            if( player.isSneaking() )
+            boolean kissAttempt = false;
+            
+            if( player.isSneaking() || player.isInsideVehicle() )
+            {
+                kissAttempt = true;
+            }
+            
+            if( kissAttempt )
             {
                 if( !canPlayerKiss( playerData ) )
                 {
@@ -98,6 +115,66 @@ public class MarryEventHandler implements Listener {
         }
     }
     
+    @EventHandler
+    public void onEnterBed( PlayerBedEnterEvent e )
+    {
+        // Gather player data
+        Player player = e.getPlayer();
+        RCPlayer playerData = plugin.playerList.get( player );
+        
+        // Cache bed location
+        Block bed = e.getBed();
+        bedCache.put(player, bed.getLocation());
+        
+        // See if spouse is currently online
+        Player spousePlayer = getOnlineSpouse( player );
+        if( spousePlayer == null )
+        {
+            return;
+        }
+        
+        RCPlayer spouseData = plugin.playerList.get( spousePlayer );
+        
+        // See if they are in bed
+        if( !spousePlayer.isSleeping() )
+        {
+            return;
+        }
+        
+        Location spouseBed = bedCache.get(spousePlayer);
+        
+        // See if in same world
+        if( !spouseBed.getWorld().equals( bed.getWorld() ) )
+        {
+            return;
+        }
+        
+        // Check range
+        double distance = spouseBed.distance( bed.getLocation() );
+        if( distance > 5 )
+        {
+            return;
+        }
+        
+        // Send messages
+        playerData.setMarriageBed(player.getLocation());
+        spouseData.setMarriageBed(spousePlayer.getLocation());
+        
+        player.sendMessage(Prefixes.marry + "You got in bed with "+spousePlayer.getDisplayName());
+        spousePlayer.sendMessage(Prefixes.marry + player.getDisplayName() + "Got in bed with you");
+        
+        player.sendMessage(Prefixes.marry + "Marriage bed set. Use /marry bed to TP here!");
+        spousePlayer.sendMessage(Prefixes.marry + "Marriage bed set. Use /marry bed to TP here!");
+    }
+    
+    @EventHandler
+    public void onLeaveBed( PlayerBedLeaveEvent e )
+    {
+        Player player = e.getPlayer();
+        bedCache.remove(player);
+        plugin.getLogger().log(Level.INFO, "RCDebug: {0} left bed", player.getDisplayName());
+    }
+    
     private boolean canPlayerKiss( RCPlayer playerData )
     {
         Date now = new Date();
@@ -107,13 +184,32 @@ public class MarryEventHandler implements Listener {
             return true;
         }
         
-        if( now.getTime() - playerData.lastKiss.getTime() >= 5000 )
+        if( now.getTime() - playerData.lastKiss.getTime() >= 2500 )
         {
             playerData.lastKiss = now;
             return true;
         }
         
         return false;
+    }
+    
+    private Player getOnlineSpouse( Player player )
+    {
+        RCPlayer playerData = plugin.playerList.get( player );
+        
+        if( playerData.getSpouse() == null )
+        {
+            return null;
+        }
+        
+        UUID spouseID = playerData.getSpouse();
+        Player spousePlayer = Bukkit.getPlayer(spouseID);
+        if( spousePlayer == null )
+        {
+            return null;
+        }
+        
+        return spousePlayer;
     }
     
 }

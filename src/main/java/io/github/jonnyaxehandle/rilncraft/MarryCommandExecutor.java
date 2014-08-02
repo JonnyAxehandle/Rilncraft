@@ -1,5 +1,8 @@
 package io.github.jonnyaxehandle.rilncraft;
 
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.ChatChannel;
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.MarriageChatChannel;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -21,13 +24,30 @@ class MarryCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] args) {
 
-        String targetName;
+        String targetName,subCommand;
         try {
-            targetName = args[0];
-            return sendMarriageRequest( ( Player ) cs , targetName );
+            subCommand = args[0];
+            
+            switch( subCommand )
+            {
+                case "propose":
+                    try
+                    {
+                        targetName = args[1];
+                        return sendMarriageRequest( ( Player ) cs , targetName );
+                    } catch( ArrayIndexOutOfBoundsException ex ) {
+                        return false;
+                    }
+                case "bed":
+                    return goToBed( ( Player ) cs );
+                case "chat":
+                    return goToChat( ( Player ) cs );
+            }
         } catch( ArrayIndexOutOfBoundsException ex ) {
             return displayMarriageInfo( ( Player ) cs );
         }
+        
+        return false;
     }
 
     private boolean displayMarriageInfo( Player player ) {
@@ -90,6 +110,96 @@ class MarryCommandExecutor implements CommandExecutor {
         targetPlayer.sendMessage("-- Type /deny to deny");
         
         return true;
+    }
+
+    private boolean goToBed(Player player) {
+        RCPlayer playerData = plugin.playerList.get( player );
+        
+        if( playerData.getSpouse() == null )
+        {
+            player.sendMessage(Prefixes.marry + "You are not married");
+            return true;
+        }
+        
+        if( playerData.getMarriageBed() == null )
+        {
+            player.sendMessage(Prefixes.marry + "Marriage bed is not set!");
+            return true;
+        }
+        
+        player.teleport( playerData.getMarriageBed() );
+        
+        return true;
+    }
+
+    private boolean goToChat(Player player) {
+        RCPlayer playerData = plugin.playerList.get( player );
+        
+        if( playerData.getSpouse() == null )
+        {
+            player.sendMessage(Prefixes.marry + "You are not married");
+            return true;
+        }
+        
+        if( playerData.getChatChannel() != null )
+        {
+            // Leave your current channel
+            ChatChannel currentChatChannel = playerData.getChatChannel();
+            currentChatChannel.removePlayer(player);
+            playerData.setChatChannel( null );
+            if( currentChatChannel instanceof MarriageChatChannel )
+            {
+                // Intent was to leave marriage chat
+                return true;
+            }
+        }
+        
+        MarriageChatChannel channelToJoin;
+        
+        Player spousePlayer = getOnlineSpouse( player );
+        RCPlayer spouseData;
+        if( spousePlayer != null )
+        {
+            spouseData = plugin.getPlayerList().get(spousePlayer);
+            if( spouseData.getChatChannel() != null && spouseData.getChatChannel() instanceof MarriageChatChannel )
+            {
+                channelToJoin = (MarriageChatChannel) spouseData.getChatChannel();
+            }
+            else
+            {
+                channelToJoin = new MarriageChatChannel( plugin );
+                spousePlayer.sendMessage( Prefixes.marry + player.getDisplayName() + " joined marriage chat");
+                spousePlayer.sendMessage( "-- To join type: /marry chat");
+            }
+        }
+        else
+        {
+            channelToJoin = new MarriageChatChannel( plugin );
+        }
+        
+        channelToJoin.addPlayer(player);
+        playerData.setChatChannel(channelToJoin);
+        
+        return true;
+    }
+    
+    private Player getOnlineSpouse( Player player )
+    {
+        RCPlayer playerData = plugin.playerList.get( player );
+        
+        if( playerData.getSpouse() == null )
+        {
+            return null;
+        }
+        
+        UUID spouseID = playerData.getSpouse();
+        Player spousePlayer = Bukkit.getPlayer(spouseID);
+        if( spousePlayer == null )
+        {
+            return null;
+        }
+        
+        return spousePlayer;
     }
     
 }

@@ -1,5 +1,6 @@
 package io.github.jonnyaxehandle.rilncraft;
 
+import io.github.jonnyaxehandle.rilncraft.ChatChannels.ChatChannel;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,12 +22,14 @@ public class Team {
     private String name;
     private File customConfigFile;
     private YamlConfiguration customConfig;
+    private final ChatChannel chatChannel;
     
     public Team( Rilncraft rc )
     {
-        this.members = new ArrayList<>();
-        this.officers = new ArrayList<>();
         plugin = rc;
+        members = new ArrayList<>();
+        officers = new ArrayList<>();
+        chatChannel = new ChatChannel( plugin );
     }
     
     public Team create( String n , UUID o )
@@ -172,6 +175,11 @@ public class Team {
 
     void delete() {
         customConfigFile.delete();
+    }
+    
+    public ChatChannel getChatChannel()
+    {
+        return chatChannel;
     }
     
 }

@@ -4,6 +4,9 @@ package io.github.jonnyaxehandle.rilncraft;
 import com.lenis0012.bukkit.npc.NPCFactory;
 import com.lenis0012.bukkit.npc.NPCProfile;*/
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +36,7 @@ public final class Rilncraft extends JavaPlugin implements Listener {
     
     PlayerList playerList;
     TeamList teamList;
+    private RankList rankList;
     
     @Override
     public void onEnable()
@@ -112,6 +116,7 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new CreatureDeathEventHandler(this), this);
         getServer().getPluginManager().registerEvents(new ClaimEventHandler(this), this);
         getServer().getPluginManager().registerEvents(new MarryEventHandler(this), this);
+        getServer().getPluginManager().registerEvents(new ChatEventHandler(this), this);
         
         // Particles
         //EffectLib lib = EffectLib.instance();
@@ -121,6 +126,30 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         claimedRegions = new ClaimedRegionList( this );
         claimedRegions.load();
         
+        // Test ranks file
+        /*File rankConfigFile = new File(getDataFolder(), "ranks.yml");
+        if( !rankConfigFile.exists() )
+        {
+            copy(getResource("ranks.yml"), rankConfigFile);
+        }
+        rankList = new RankList( this );
+        rankList.load(rankConfigFile);*/
+        
+    }
+    
+    private void copy(InputStream in, File file) {
+    try {
+        OutputStream out = new FileOutputStream(file);
+        byte[] buf = new byte[1024];
+        int len;
+        while((len=in.read(buf))>0){
+            out.write(buf,0,len);
+        }
+        out.close();
+        in.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
     }
     
     @Override
@@ -159,45 +188,9 @@ public final class Rilncraft extends JavaPlugin implements Listener {
         e.getPlayer().sendMessage(String.format("You lost %d Riln",deduction));
         playerData.sendBalance();
     }
-    
-    @EventHandler
-    public void onPlayerChat( AsyncPlayerChatEvent e )
-    {
-        Player player = e.getPlayer();
-        RCPlayer playerData = playerList.get(player);
-        String message = e.getMessage();
-        
-        for( Player recipient : e.getRecipients() )
-        {
-            RCPlayer recipientData = playerList.get(recipient);
-            if( recipientData == null )
-            {
-                return;
-            }
-            
-            StringBuilder tagList = new StringBuilder();
-            
-            if( recipientData.hasRelationTo(playerData, PlayerRelation.SPOUSE) )
-            {
-                tagList.append("§5[§dM§5]§r");
-            }
-            
-            if( recipientData.hasRelationTo(playerData, PlayerRelation.FRIEND) )
-            {
-                tagList.append("§2[§aF§2]§r");
-            }
-            
-            if( recipientData.hasRelationTo(playerData, PlayerRelation.TEAMMATE) )
-            {
-                tagList.append("§1[§9T§1]§r");
-            }
-            
-            String tags = ( tagList.length() > 0 ) ? " "+tagList.toString() : "";
-            
-            recipient.sendMessage(String.format("<%s%s> %s",player.getDisplayName(),tags,message));
-        }
-        
-        e.setCancelled(true);
+
+    public PlayerList getPlayerList() {
+        return playerList;
     }
     
 }
